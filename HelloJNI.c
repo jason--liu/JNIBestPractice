@@ -3,11 +3,19 @@
 
 #define NELEM(x) (sizeof(x) / sizeof((x)[0]))
 /* #define JNI_CLASS "HelloJNI" */
-#define JNI_CLASS "TestJNIPrimitive"
+/* #define JNI_CLASS "TestJNIPrimitive" */
+#define JNI_CLASS "TestJNIString"
 
-static void native_sayhello(JNIEnv *env, jclass cls)
+static void native_sayhello(JNIEnv *env, jclass cls, jstring inJNIString)
 {
-    printf("hello world!\n");
+    const char *inCStr = (*env)->GetStringUTFChars(env, inJNIString, NULL);
+    if (NULL == inCStr) return NULL;
+
+    printf("In C, the received string is :%s\n", inCStr);
+    (*env)->ReleaseStringUTFChars(env, inJNIString, inCStr);
+
+    char *outCStr = "Hello Java";
+    return (*env)->NewStringUTF(env, outCStr);
 }
 
 static jdouble native_average(JNIEnv *env ,jobject obj, jint n1, jint n2)
@@ -20,7 +28,8 @@ static jdouble native_average(JNIEnv *env ,jobject obj, jint n1, jint n2)
 
 static JNINativeMethod method_table[] = {
     /* {"sayhello", "()V", (void *)native_sayhello}, */
-    {"average", "(II)D", (void *)native_average},
+    /* {"average", "(II)D", (void *)native_average}, */
+    {"sayhello", "(Ljava/lang/String;)Ljava/lang/String;", (void *)native_sayhello},
 };
 
 static int registerNativeMethods(JNIEnv *env, const char* className, JNINativeMethod *gMethods, int numMethods)
