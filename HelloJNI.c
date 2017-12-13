@@ -2,15 +2,25 @@
 #include <jni.h>
 
 #define NELEM(x) (sizeof(x) / sizeof((x)[0]))
-#define JNI_CLASS "HelloJNI"
+/* #define JNI_CLASS "HelloJNI" */
+#define JNI_CLASS "TestJNIPrimitive"
 
 static void native_sayhello(JNIEnv *env, jclass cls)
 {
     printf("hello world!\n");
 }
 
+static jdouble native_average(JNIEnv *env ,jobject obj, jint n1, jint n2)
+{
+    jdouble result;
+    result = ((jdouble)n1 + n2) / 2.0;
+
+    return result;
+}
+
 static JNINativeMethod method_table[] = {
-    {"sayhello", "()V", (void *)native_sayhello},
+    /* {"sayhello", "()V", (void *)native_sayhello}, */
+    {"average", "(II)D", (void *)native_average},
 };
 
 static int registerNativeMethods(JNIEnv *env, const char* className, JNINativeMethod *gMethods, int numMethods)
