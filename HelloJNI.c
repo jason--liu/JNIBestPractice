@@ -4,7 +4,8 @@
 #define NELEM(x) (sizeof(x) / sizeof((x)[0]))
 /* #define JNI_CLASS "HelloJNI" */
 /* #define JNI_CLASS "TestJNIPrimitive" */
-#define JNI_CLASS "TestJNIString"
+/* #define JNI_CLASS "TestJNIString" */
+#define JNI_CLASS "TestJNIPrimitiveArray"
 
 static void native_sayhello(JNIEnv *env, jclass cls, jstring inJNIString)
 {
@@ -26,10 +27,34 @@ static jdouble native_average(JNIEnv *env ,jobject obj, jint n1, jint n2)
     return result;
 }
 
+static jdoubleArray native_sumAndAverage(JNIEnv *env, jobject obj, jintArray inJNIArray)
+{
+    jint *inCArray = (*env)->GetIntArrayElements(env, inJNIArray, NULL);
+    if (NULL == inCArray) return NULL;
+    jsize length = (*env)->GetArrayLength(env, inJNIArray);
+
+    jint sum = 0;
+    jint i;
+    for (i = 0; i < length; ++i) {
+        sum += inCArray[i];
+    }
+
+    jdouble average = (jdouble)sum / length;
+
+    (*env)->ReleaseIntArrayElements(env, inJNIArray, inCArray, 0);
+
+    jdouble outCarry[] = {sum, average};
+    jdoubleArray outJniArray = (*env)->NewDoubleArray(env, 2);
+    if (NULL == outJniArray) return NULL;
+    (*env)->SetDoubleArrayRegion(env, outJniArray, 0, 2, outCarry);
+    return outJniArray;
+
+}
 static JNINativeMethod method_table[] = {
     /* {"sayhello", "()V", (void *)native_sayhello}, */
     /* {"average", "(II)D", (void *)native_average}, */
-    {"sayhello", "(Ljava/lang/String;)Ljava/lang/String;", (void *)native_sayhello},
+    /* {"sayhello", "(Ljava/lang/String;)Ljava/lang/String;", (void *)native_sayhello}, */
+    {"sumAndAverage", "([I)[D", (void *)native_sumAndAverage},
 };
 
 static int registerNativeMethods(JNIEnv *env, const char* className, JNINativeMethod *gMethods, int numMethods)
